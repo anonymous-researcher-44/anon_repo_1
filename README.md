@@ -34,9 +34,9 @@ The columns are:
 
 - treatment, a binary treatment indicator
 - play_delay, the post-treatment time outcome, normalized by the largest value
-- pre_play_delay, the pre-treatment time outcome, normaliezd by the largest value of play_delay
+- pre_play_delay, the pre-treatment time outcome, normalized by the largest value of play_delay
 - log_play_delay, the post-treatment log-time outcome, normalized by the largest value
-- log_pre_play_delay, the pre-treatment log-time outcome, normaliezd by the largest value of log_play_delay
+- log_pre_play_delay, the pre-treatment log-time outcome, normalized by the largest value of log_play_delay
 
 ## Figures
 - jasa_play_delay_cdf.png
