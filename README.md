@@ -48,4 +48,11 @@ The columns are:
 - stopping_times_xi_0.4.png
 - stopping_times_xi_0.2.png
 
-
+## Dependencies
+- Python 3.10.16
+- scipy 1.15.2
+- numpy 2.2.3
+- fn 0.6.0
+- joblib 1.4.2
+- tqdm 4.67.1
+- pandas 2.2.3
