@@ -42,9 +42,11 @@ anon_repo_1/
 
 ## Dependencies and Setup
 
-Requires Python 3.10+.
+Requires Python 3.10+. We recommend creating a virtual environment:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
