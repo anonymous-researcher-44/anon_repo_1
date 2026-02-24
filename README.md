@@ -1,58 +1,149 @@
-# Code for Reproducibility
+# Anytime-Valid Inference in Linear Models and Regression-Adjusted Causal Inference
+
+This repository contains the code and data to reproduce all figures in the paper "Anytime-Valid Inference in Linear Models and Regression-Adjusted Causal Inference" (JASA-T&M-2024-0112.R1).
+
+## Repository Structure
+
+```
+anon_repo_1/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── code/
+│   ├── simulated_example.ipynb      # Figures 1(a), 1(b)
+│   ├── play_delay_example.ipynb     # Figures 2(a), 2(b), 7
+│   ├── power_comparison.ipynb       # Figures 3, 4, 5
+│   ├── U_scatter.ipynb              # Figure 6
+│   └── radius_comparison.ipynb      # Figure 8
+├── data/
+│   └── playdelay.csv                # PlayDelay experimental dataset
+├── results/                         # Pre-computed simulation results (.pkl)
+│   ├── simulated_example_null.pkl
+│   ├── simulated_example_alternative.pkl
+│   ├── play_delay_lm_results_null.pkl
+│   ├── play_delay_lm_results_alt.pkl
+│   ├── bernstein_playdelay_null.pkl
+│   ├── bernstein_playdelay_alt.pkl
+│   ├── power_0.pkl
+│   ├── power_0.2.pkl
+│   └── power_0.4.pkl
+└── figures/                         # Generated figure files (.png)
+    ├── simulated_example_null.png
+    ├── simulated_example_alternative.png
+    ├── playdelay_null.png
+    ├── playdelay_alt.png
+    ├── jasa_play_delay_cdf.png
+    ├── stopping_times_xi_0.png
+    ├── stopping_times_xi_0.2.png
+    ├── stopping_times_xi_0.4.png
+    ├── U_scatter.png
+    └── radius_comparison.png
+```
+
+## Dependencies and Setup
+
+Requires Python 3.10+.
+
+```bash
+pip install -r requirements.txt
+```
+
+The dependencies are: `numpy`, `scipy`, `pandas`, `matplotlib`, `tqdm`, `joblib`, `fn.py`.
 
 ## Notebooks
-There are three primary python notebooks
 
-- simulated_example.ipynb
-- play_delay_example.ipynb
-- power_comparison.ipynb
+### `code/simulated_example.ipynb`
 
-You may need to install the following python libraries to your environment.
-```
-pip install numpy pandas matplotlib scipy tqdm joblib fn.py
-```
+Simulates the linear model example from Section 5.1 with heteroskedastic, heavy-tailed errors. Computes sequential OLS estimates and the e-processes $G_n$, $E^G_n$, and $E_n$ for $g \in \{1, 10, 1000\}$. Runs 1,000 simulation replicates under both the null ($\delta_0 = 0$, $n = 10{,}000$) and alternative ($\delta_0 = 1$, $n = 5{,}000$).
 
-These notebooks contain computationally intensive simulations.
-To avoid re-running the simulations, the simulation results have been pickled for convenience.
+- **Inputs**: None (synthetic data)
+- **Outputs**: `results/simulated_example_null.pkl`, `results/simulated_example_alternative.pkl`, `figures/simulated_example_null.png`, `figures/simulated_example_alternative.png`
+- **Runtime**: ~20 minutes total (null: ~15 min, alternative: ~6 min at ~1 sim/sec)
 
-## Pickled Simulation Results
-To bypass reperforming the simulations, one can simply skip the cells in the notebook, and proceed to the cell which reads from the .pkl files.
+### `code/play_delay_example.ipynb`
 
-- bernstein_playdelay_alt.pkl
-- bernstein_playdelay_null.pkl
-- play_delay_lm_results_alt.pkl
-- play_delay_lm_results_null.pkl
-- power_0.2.pkl
-- power_0.4.pkl
-- power_0.pkl
-- simulated_example_alternative.pkl
-- simulated_example_null.pkl
+Applies the sequential testing methods to the PlayDelay A/B test dataset. Implements both the regression-adjusted e-process approach (using OLS with pre-treatment covariates) and the AIPW empirical Bernstein method. Runs 1,000 replicates under both null (bootstrap from control) and alternative (bootstrap from both arms).
 
-## Data
-The PlayDelay dataset is contained in playdelay.csv.
-The columns are:
+- **Inputs**: `data/playdelay.csv`
+- **Outputs**: `results/play_delay_lm_results_null.pkl`, `results/play_delay_lm_results_alt.pkl`, `results/bernstein_playdelay_null.pkl`, `results/bernstein_playdelay_alt.pkl`, `figures/playdelay_null.png`, `figures/playdelay_alt.png`, `figures/jasa_play_delay_cdf.png`
+- **Runtime**: ~4 hours total (LM null: ~90 min, LM alt: ~90 min, Bernstein sims: ~30 min with parallelism)
 
-- treatment, a binary treatment indicator
-- play_delay, the post-treatment time outcome, normalized by the largest value
-- pre_play_delay, the pre-treatment time outcome, normalized by the largest value of play_delay
-- log_play_delay, the post-treatment log-time outcome, normalized by the largest value
-- log_pre_play_delay, the pre-treatment log-time outcome, normalized by the largest value of log_play_delay
+### `code/power_comparison.ipynb`
 
-## Figures
-- jasa_play_delay_cdf.png
-- playdelay_alt.png
-- playdelay_null.png
-- simulated_example_alternative.png
-- simulated_example_null.png
-- stopping_times_xi_0.png
-- stopping_times_xi_0.4.png
-- stopping_times_xi_0.2.png
+Compares the sequential testing procedure to the fixed-sample F-test in terms of stopping times and power. Computes the width-optimal and growth-optimal $g$ parameters for a given minimum detectable effect (MDE), then simulates 10,000 replicates at $\xi \in \{0, 0.2, 0.4\}$.
 
-## Dependencies
-- Python 3.10.16
-- scipy 1.15.2
-- numpy 2.2.3
-- fn 0.6.0
-- joblib 1.4.2
-- tqdm 4.67.1
-- pandas 2.2.3
+- **Inputs**: None (synthetic data)
+- **Outputs**: `results/power_0.pkl`, `results/power_0.2.pkl`, `results/power_0.4.pkl`, `figures/stopping_times_xi_0.png`, `figures/stopping_times_xi_0.2.png`, `figures/stopping_times_xi_0.4.png`
+- **Runtime**: ~4 hours total (3 scenarios × 10,000 simulations)
+
+### `code/U_scatter.ipynb`
+
+Generates the scatter plot of unit-sphere projections $U(Y)$ under the null ($\xi = 0$) and alternative ($\xi = 10$), illustrating the directional concentration of the sufficient statistic.
+
+- **Inputs**: None (synthetic data)
+- **Outputs**: `figures/U_scatter.png`
+- **Runtime**: < 1 second
+
+### `code/radius_comparison.ipynb`
+
+Plots the confidence radius functions $R(g,n,\alpha)$ and $R^G(g,n,\alpha)$ for $g \in \{1, 100, 1000\}$, comparing the finite-sample and asymptotic radius bounds.
+
+- **Inputs**: None (deterministic calculation)
+- **Outputs**: `figures/radius_comparison.png`
+- **Runtime**: < 1 second
+
+## Figure-to-Manuscript Mapping
+
+| Figure in Manuscript | File | Generated by |
+|---|---|---|
+| Figure 1(a) (Main Text) | `figures/simulated_example_null.png` | `code/simulated_example.ipynb` |
+| Figure 1(b) (Main Text) | `figures/simulated_example_alternative.png` | `code/simulated_example.ipynb` |
+| Figure 2(a) (Main Text) | `figures/playdelay_null.png` | `code/play_delay_example.ipynb` |
+| Figure 2(b) (Main Text) | `figures/playdelay_alt.png` | `code/play_delay_example.ipynb` |
+| Figure 3 (Supplementary) | `figures/stopping_times_xi_0.2.png` | `code/power_comparison.ipynb` |
+| Figure 4 (Supplementary) | `figures/stopping_times_xi_0.4.png` | `code/power_comparison.ipynb` |
+| Figure 5 (Supplementary) | `figures/stopping_times_xi_0.png` | `code/power_comparison.ipynb` |
+| Figure 6 (Supplementary) | `figures/U_scatter.png` | `code/U_scatter.ipynb` |
+| Figure 7 (Supplementary) | `figures/jasa_play_delay_cdf.png` | `code/play_delay_example.ipynb` |
+| Figure 8 (Supplementary) | `figures/radius_comparison.png` | `code/radius_comparison.ipynb` |
+
+## Workflow
+
+### Quick Reproduction (load pre-computed results)
+
+To reproduce figures without re-running simulations (~1 minute):
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Open each notebook in `code/`
+3. **Skip** the simulation cells (the cells calling `run_multiple_simulations()`, `Parallel(...)`, or containing the `for i in range(n_simulations)` loops)
+4. **Run** the cells that load from `.pkl` files (e.g., `with open(..., 'rb') as f: pickle.load(f)`) and the subsequent plotting cells
+5. Figures will be saved to `figures/`
+
+For `code/U_scatter.ipynb` and `code/radius_comparison.ipynb`, simply run all cells (no simulation step).
+
+### Full Reproduction (re-run all simulations)
+
+To reproduce everything from scratch (~8+ hours):
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Run each notebook end-to-end:
+   - `code/simulated_example.ipynb` (~20 min)
+   - `code/play_delay_example.ipynb` (~4 hours)
+   - `code/power_comparison.ipynb` (~4 hours)
+   - `code/U_scatter.ipynb` (< 1 sec)
+   - `code/radius_comparison.ipynb` (< 1 sec)
+3. Results will be saved to `results/` and figures to `figures/`
+
+Runtime estimates are based on a machine with 96 CPU cores. The Bernstein simulations in `play_delay_example.ipynb` use `joblib.Parallel` and will benefit from multiple cores. All other simulations are single-threaded.
+
+## Data Description
+
+`data/playdelay.csv` contains data from a randomized A/B test measuring video play delay. The columns are:
+
+| Column | Description |
+|---|---|
+| `treatment` | Binary treatment indicator (0 = control, 1 = treatment) |
+| `play_delay` | Post-treatment play delay time, normalized by the maximum value |
+| `pre_play_delay` | Pre-treatment play delay time, normalized by the maximum value of `play_delay` |
+| `log_play_delay` | Log of post-treatment play delay, normalized by the maximum log value |
+| `log_pre_play_delay` | Log of pre-treatment play delay, normalized by the maximum value of `log_play_delay` |
