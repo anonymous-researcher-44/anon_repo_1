@@ -1,7 +1,7 @@
 numpy==2.2.3
 scipy==1.15.2
 pandas==2.2.3
-matplotlib
+matplotlib==3.10.7
 tqdm==4.67.1
 joblib==1.4.2
 fn.py==0.6.0

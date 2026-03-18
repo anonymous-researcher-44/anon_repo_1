@@ -68,7 +68,7 @@ Applies the sequential testing methods to the PlayDelay A/B test dataset. Implem
 
 - **Inputs**: `data/playdelay.csv`
 - **Outputs**: `results/play_delay_lm_results_null.pkl`, `results/play_delay_lm_results_alt.pkl`, `results/bernstein_playdelay_null.pkl`, `results/bernstein_playdelay_alt.pkl`, `figures/playdelay_null.png`, `figures/playdelay_alt.png`, `figures/jasa_play_delay_cdf.png`
-- **Runtime**: ~4 hours total (LM null: ~90 min, LM alt: ~90 min, Bernstein sims: ~30 min with parallelism)
+- **Runtime**: ~4 hours total (LM null: ~90 min, LM alt: ~90 min, Bernstein sims: ~30 min with parallelism). Single-replicate estimate: ~5–6 seconds per LM replicate (single-threaded); Bernstein sims use `joblib.Parallel(n_jobs=50)` so single-replicate wall-clock time is ~2 seconds with parallelism.
 
 ### `code/power_comparison.ipynb`
 
@@ -76,7 +76,7 @@ Compares the sequential testing procedure to the fixed-sample F-test in terms of
 
 - **Inputs**: None (synthetic data)
 - **Outputs**: `results/power_0.pkl`, `results/power_0.2.pkl`, `results/power_0.4.pkl`, `figures/stopping_times_xi_0.png`, `figures/stopping_times_xi_0.2.png`, `figures/stopping_times_xi_0.4.png`
-- **Runtime**: ~4 hours total (3 scenarios × 10,000 simulations)
+- **Runtime**: ~4 hours total (3 scenarios × 10,000 simulations; single-replicate estimate: ~0.5 seconds per replicate)
 
 ### `code/U_scatter.ipynb`
 
@@ -111,21 +111,23 @@ Plots the confidence radius functions $R(g,n,\alpha)$ and $R^G(g,n,\alpha)$ for 
 
 ## Workflow
 
-### Quick Reproduction (load pre-computed results)
+There are two ways to reproduce the figures: a **quick path** (~1 minute) that loads pre-computed simulation results from `results/*.pkl` and regenerates the plots, and a **full path** (~8+ hours) that re-runs all simulations from scratch and regenerates the results and plots.
 
-To reproduce figures without re-running simulations (~1 minute):
+### Quick Reproduction — load pre-computed results and regenerate figures (~1 minute)
+
+Pre-computed simulation results are stored in `results/*.pkl`. Use this path to verify that the plotting code reproduces the figures without re-running the simulations.
 
 1. Install dependencies: `pip install -r requirements.txt`
 2. Open each notebook in `code/`
-3. **Skip** the simulation cells (the cells calling `run_multiple_simulations()`, `Parallel(...)`, or containing the `for i in range(n_simulations)` loops)
-4. **Run** the cells that load from `.pkl` files (e.g., `with open(..., 'rb') as f: pickle.load(f)`) and the subsequent plotting cells
-5. Figures will be saved to `figures/`
+3. Run all cells **in order**, but **skip** the simulation cells — specifically, skip cells that call `run_multiple_simulations()`, that call `Parallel(...)`, or that contain a `for i in range(n_simulations)` loop. Also skip the immediately following "save results" cells (`pickle.dump`).
+4. Instead, **run** the "load results" cells (labeled `# load results`, or any cell with `with open(..., 'rb') as f: pickle.load(f)`) to load the pre-computed results from `results/*.pkl`.
+5. Continue running the plotting cells as normal. Figures will be saved to `figures/`.
 
-For `code/U_scatter.ipynb` and `code/radius_comparison.ipynb`, simply run all cells (no simulation step).
+For `code/U_scatter.ipynb` and `code/radius_comparison.ipynb`, simply run all cells — there is no simulation step.
 
-### Full Reproduction (re-run all simulations)
+### Full Reproduction — re-run all simulations from scratch (~8+ hours)
 
-To reproduce everything from scratch (~8+ hours):
+Use this path to regenerate the simulation results in `results/*.pkl` and all figures from scratch.
 
 1. Install dependencies: `pip install -r requirements.txt`
 2. Run each notebook end-to-end:
@@ -134,7 +136,7 @@ To reproduce everything from scratch (~8+ hours):
    - `code/power_comparison.ipynb` (~4 hours)
    - `code/U_scatter.ipynb` (< 1 sec)
    - `code/radius_comparison.ipynb` (< 1 sec)
-3. Results will be saved to `results/` and figures to `figures/`
+3. Results will be saved to `results/` and figures to `figures/`.
 
 Runtime estimates are based on a machine with 96 CPU cores. The Bernstein simulations in `play_delay_example.ipynb` use `joblib.Parallel` and will benefit from multiple cores. All other simulations are single-threaded.
 
