@@ -68,7 +68,7 @@ Applies the sequential testing methods to the PlayDelay A/B test dataset. Implem
 
 - **Inputs**: `data/playdelay.csv`
 - **Outputs**: `results/play_delay_lm_results_null.pkl`, `results/play_delay_lm_results_alt.pkl`, `results/bernstein_playdelay_null.pkl`, `results/bernstein_playdelay_alt.pkl`, `figures/playdelay_null.png`, `figures/playdelay_alt.png`, `figures/jasa_play_delay_cdf.png`
-- **Runtime**: ~4 hours total (LM null: ~90 min, LM alt: ~90 min, Bernstein sims: ~30 min with parallelism). Single-replicate estimate: ~5–6 seconds per LM replicate (single-threaded); Bernstein sims use `joblib.Parallel(n_jobs=50)` so single-replicate wall-clock time is ~2 seconds with parallelism.
+- **Runtime**: ~3 hours total (LM null: ~90 min, LM alt: ~90 min, Bernstein sims: ~30 min with parallelism). Bernstein sims use `joblib.Parallel(n_jobs=50)` and will benefit from multiple cores.
 
 ### `code/power_comparison.ipynb`
 
@@ -76,7 +76,7 @@ Compares the sequential testing procedure to the fixed-sample F-test in terms of
 
 - **Inputs**: None (synthetic data)
 - **Outputs**: `results/power_0.pkl`, `results/power_0.2.pkl`, `results/power_0.4.pkl`, `figures/stopping_times_xi_0.png`, `figures/stopping_times_xi_0.2.png`, `figures/stopping_times_xi_0.4.png`
-- **Runtime**: ~4 hours total (3 scenarios × 10,000 simulations; single-replicate estimate: ~0.5 seconds per replicate)
+- **Runtime**: ~1 hour total (3 scenarios × 10,000 simulations)
 
 ### `code/U_scatter.ipynb`
 
@@ -119,21 +119,31 @@ Pre-computed simulation results are stored in `results/*.pkl`. Use this path to 
 
 1. Install dependencies: `pip install -r requirements.txt`
 2. Open each notebook in `code/`
-3. Run all cells **in order**, but **skip** the simulation cells — specifically, skip cells that call `run_multiple_simulations()`, that call `Parallel(...)`, or that contain a `for i in range(n_simulations)` loop. Also skip the immediately following "save results" cells (`pickle.dump`).
-4. Instead, **run** the "load results" cells (labeled `# load results`, or any cell with `with open(..., 'rb') as f: pickle.load(f)`) to load the pre-computed results from `results/*.pkl`.
-5. Continue running the plotting cells as normal. Figures will be saved to `figures/`.
+3. Run all cells **in order**, but **skip** any cell that runs simulations or saves results. Specifically, skip cells that:
+   - call `run_multiple_simulations()`
+   - call `Parallel(...)`
+   - contain a `for i in range(n_simulations)` loop
+   - write results with `pickle.dump`
+4. Instead, **run** the "load results" cells (`with open(..., 'rb') as f: pickle.load(f)`) to load the pre-computed results from `results/*.pkl`.
+5. Continue running the remaining setup, definition, and plotting cells as normal. Figures will be saved to `figures/`.
 
-For `code/U_scatter.ipynb` and `code/radius_comparison.ipynb`, simply run all cells — there is no simulation step.
+The following notebooks have no simulation step and can be run end-to-end without skipping anything: `code/U_scatter.ipynb` and `code/radius_comparison.ipynb`.
 
-### Full Reproduction — re-run all simulations from scratch (~8+ hours)
+For reference, the cells to **skip** in each notebook are:
+
+- **`simulated_example.ipynb`**: the two `for i in range(n_simulations)` simulation cells and their following `pickle.dump` cells.
+- **`play_delay_example.ipynb`**: the `run_multiple_simulations()` cells (null and alternative), their `pickle.dump` cells, and the two `Parallel(...)` cells with their `pickle.dump` cells.
+- **`power_comparison.ipynb`**: the three `for i in range(n_simulations)` simulation cells and their following `pickle.dump` cells (one per scenario: ξ = 0.2, 0.4, 0).
+
+### Full Reproduction — re-run all simulations from scratch (~5 hours)
 
 Use this path to regenerate the simulation results in `results/*.pkl` and all figures from scratch.
 
 1. Install dependencies: `pip install -r requirements.txt`
 2. Run each notebook end-to-end:
    - `code/simulated_example.ipynb` (~20 min)
-   - `code/play_delay_example.ipynb` (~4 hours)
-   - `code/power_comparison.ipynb` (~4 hours)
+   - `code/play_delay_example.ipynb` (~3 hours)
+   - `code/power_comparison.ipynb` (~1 hour)
    - `code/U_scatter.ipynb` (< 1 sec)
    - `code/radius_comparison.ipynb` (< 1 sec)
 3. Results will be saved to `results/` and figures to `figures/`.
