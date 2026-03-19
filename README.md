@@ -131,7 +131,7 @@ The following notebooks have no simulation step and can be run end-to-end withou
 
 For reference, the cells to **skip** in each notebook are:
 
-- **`simulated_example.ipynb`**: the two `for i in range(n_simulations)` simulation cells and their following `pickle.dump` cells.
+- **`simulated_example.ipynb`**: the two `run_multiple_simulations()` cells (null and alternative) and their following `pickle.dump` cells.
 - **`play_delay_example.ipynb`**: the `run_multiple_simulations()` cells (null and alternative), their `pickle.dump` cells, and the two `Parallel(...)` cells with their `pickle.dump` cells.
 - **`power_comparison.ipynb`**: the three `for i in range(n_simulations)` simulation cells and their following `pickle.dump` cells (one per scenario: ξ = 0.2, 0.4, 0).
 
